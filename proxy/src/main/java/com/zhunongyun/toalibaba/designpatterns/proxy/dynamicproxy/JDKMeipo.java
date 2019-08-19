@@ -13,15 +13,15 @@ public class JDKMeipo implements InvocationHandler {
     public Object getInstance(Person person) {
         this.person = person;
         Class<?> clazz = this.person.getClass();
-        before();
-        Object object = Proxy.newProxyInstance(clazz.getClassLoader(), clazz.getInterfaces(), this);
-        after();
-        return object;
+        return Proxy.newProxyInstance(clazz.getClassLoader(), clazz.getInterfaces(), this);
     }
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        return method.invoke(this.person, args);
+        before();
+        Object object = method.invoke(this.person, args);
+        before();
+        return object;
     }
 
     /**
