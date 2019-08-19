@@ -1,6 +1,4 @@
-package com.zhunongyun.toalibaba.designpatterns.proxy.dynamicproxy;
-
-import com.zhunongyun.toalibaba.designpatterns.proxy.Person;
+package com.zhunongyun.toalibaba.designpatterns.proxy;
 
 public class Girl implements Person {
 
