@@ -1,0 +1,9 @@
+<servlet>
+    <servlet-name>UserController</servlet-name>
+    <servlet-class>com.zhunongyun.toalibaba.designpatterns.delegate.spring.UserController</servlet-class>
+</servlet>
+
+<servlet-mapping>
+<servlet-name>UserController</servlet-name>
+<url-pattern>/system/user</url-pattern>
+</servlet-mapping>
