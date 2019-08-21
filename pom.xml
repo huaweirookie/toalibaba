@@ -20,6 +20,10 @@
         <module>singleton</module>
         <module>prototype</module>
         <module>proxy</module>
+        <module>strategy</module>
+        <module>template</module>
+        <module>delegate</module>
+        <module>decorator</module>
     </modules>
 
     <properties>
