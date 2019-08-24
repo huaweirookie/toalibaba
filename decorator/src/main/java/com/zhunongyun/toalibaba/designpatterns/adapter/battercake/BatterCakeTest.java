@@ -1,4 +1,4 @@
-package com.zhunongyun.toalibaba.designpatterns.decorator.battercake;
+package com.zhunongyun.toalibaba.designpatterns.adapter.battercake;
 
 public class BatterCakeTest {
     public static void main(String[] args) {

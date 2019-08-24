@@ -1,4 +1,4 @@
-package com.zhunongyun.toalibaba.designpatterns.decorator;
+package com.zhunongyun.toalibaba.designpatterns.adapter;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

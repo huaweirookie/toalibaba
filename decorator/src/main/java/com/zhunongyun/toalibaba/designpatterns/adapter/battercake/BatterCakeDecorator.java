@@ -1,4 +1,4 @@
-package com.zhunongyun.toalibaba.designpatterns.decorator.battercake;
+package com.zhunongyun.toalibaba.designpatterns.adapter.battercake;
 
 /**
  * 普通煎饼装饰器

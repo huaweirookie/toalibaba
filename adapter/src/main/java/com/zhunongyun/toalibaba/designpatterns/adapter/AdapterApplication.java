@@ -1,13 +1,12 @@
-package com.zhunongyun.toalibaba.designpatterns.decorator;
+package com.zhunongyun.toalibaba.designpatterns.adapter;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class DecoratorApplication {
+public class AdapterApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(DecoratorApplication.class, args);
+		SpringApplication.run(AdapterApplication.class, args);
 	}
-
 }
