@@ -26,6 +26,7 @@
         <module>decorator</module>
         <module>adapter</module>
         <module>observer</module>
+        <module>responsibilitychain</module>
     </modules>
 
     <properties>
