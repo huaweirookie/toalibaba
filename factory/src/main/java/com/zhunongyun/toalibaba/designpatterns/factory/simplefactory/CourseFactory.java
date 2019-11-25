@@ -2,6 +2,7 @@ package com.zhunongyun.toalibaba.designpatterns.factory.simplefactory;
 
 import com.zhunongyun.toalibaba.designpatterns.factory.common.ICourse;
 import com.zhunongyun.toalibaba.designpatterns.factory.common.JavaCourse;
+import com.zhunongyun.toalibaba.designpatterns.factory.common.PythonCourse;
 import org.apache.commons.lang3.StringUtils;
 
 public class CourseFactory {
@@ -14,6 +15,8 @@ public class CourseFactory {
     public ICourse createByName(String name) {
          if ("java".equals(name)) {
              return new JavaCourse();
+         } else if ("python".equals(name)) {
+             return new PythonCourse();
          } else {
              return null;
          }

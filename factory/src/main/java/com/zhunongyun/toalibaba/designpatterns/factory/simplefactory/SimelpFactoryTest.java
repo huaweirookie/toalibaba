@@ -17,14 +17,14 @@ public class SimelpFactoryTest {
         nameCourse.record();
 
         // 通过类路径创建对象
-        ICourse classNameCourse = courseFactory.createByClassPath("com.zhunongyun.toalibaba.designpatterns.factorypattern.common.JavaCourse");
+        ICourse classNameCourse = courseFactory.createByClassPath("com.zhunongyun.toalibaba.designpatterns.factory.common.JavaCourse");
         classNameCourse.record();
 
         // 通过类创建对象
         ICourse classCourse = courseFactory.createByClass(JavaCourse.class);
         classCourse.record();
 
-        Calendar calendar = Calendar.getInstance();
-        Logger logger = LoggerFactory.getLogger("");
+        ICourse pythonCourse = courseFactory.createByName("python");
+        pythonCourse.record();
     }
 }
