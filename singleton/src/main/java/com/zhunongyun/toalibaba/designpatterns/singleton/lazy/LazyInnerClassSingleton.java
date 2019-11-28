@@ -6,6 +6,9 @@ package com.zhunongyun.toalibaba.designpatterns.singleton.lazy;
 public class LazyInnerClassSingleton {
 
     private LazyInnerClassSingleton(){
+        /**
+         * 在私有构造方法中增加判断能防止反射破坏单例
+         */
         if (null != LazyHolder.LAZY) {
             throw new RuntimeException("禁止反射创建实例");
         }
