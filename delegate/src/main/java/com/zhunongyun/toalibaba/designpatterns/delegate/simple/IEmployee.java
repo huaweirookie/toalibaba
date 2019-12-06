@@ -4,5 +4,5 @@ public interface IEmployee {
     /**
      * 工作
      */
-    void doing();
+    void doing(String command);
 }

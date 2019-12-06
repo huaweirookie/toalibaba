@@ -23,7 +23,7 @@ public class MyClassLoader extends ClassLoader {
                  ByteArrayOutputStream outputStream = new ByteArrayOutputStream();) {
                 byte[] buff = new byte[1024];
                 int len;
-                while((len=fileInputStream.read(buff))!=-1){
+                while((len = fileInputStream.read(buff)) != -1){
                     outputStream.write(buff, 0, len);
                 }
                 return defineClass(className, outputStream.toByteArray(), 0, outputStream.size());

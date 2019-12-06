@@ -12,7 +12,6 @@ public class MyMeipo implements MyInvocationHandler {
         this.person = person;
         Class<?> clazz = this.person.getClass();
         return MyProxy.newProxyInstance(new MyClassLoader(), clazz.getInterfaces(), this);
-
     }
 
     @Override

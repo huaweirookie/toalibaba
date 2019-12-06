@@ -16,7 +16,6 @@ public class JDKMeipo implements InvocationHandler {
         return Proxy.newProxyInstance(clazz.getClassLoader(), clazz.getInterfaces(), this);
     }
 
-    @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         before();
         Object object = method.invoke(this.person, args);
@@ -28,12 +27,12 @@ public class JDKMeipo implements InvocationHandler {
      * 增强目标对象
      * 执行之前
      */
-    private void before(){
+    private void before() {
         System.out.println("我是媒婆,已经收到你的诉求");
         System.out.println("正在物色对象");
     }
 
-    /**
+    /**啧啧啧啧啧啧做Ω
      * 增强目标对象
      * 执行之后
      */

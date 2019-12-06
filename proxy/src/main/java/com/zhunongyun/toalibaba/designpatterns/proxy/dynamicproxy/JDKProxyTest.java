@@ -13,7 +13,7 @@ public class JDKProxyTest {
 
         byte[] bytes = ProxyGenerator.generateProxyClass("$Proxy0", new Class[]{Person.class});
 
-        try (FileOutputStream fileOutputStream = new FileOutputStream("$Proxy0.class")) {
+        try (FileOutputStream fileOutputStream = new FileOutputStream("./proxy/$Proxy0.class")) {
             fileOutputStream.write(bytes);
         } catch (Exception e) {
             e.printStackTrace();
