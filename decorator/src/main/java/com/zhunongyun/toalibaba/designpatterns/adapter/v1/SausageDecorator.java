@@ -1,17 +1,16 @@
-package com.zhunongyun.toalibaba.designpatterns.adapter.battercake;
+package com.zhunongyun.toalibaba.designpatterns.adapter.v1;
 
-/**
- * 加香肠装饰器
- */
-public class SausageDecorator extends BatterCakeDecorator{
-
+public class SausageDecorator extends BatterCakeDecorator {
     public SausageDecorator(BatterCake batterCake) {
         super(batterCake);
     }
 
+    protected void doSomething() {
+    }
+
     @Override
     protected String getMsg() {
-        return super.getMsg() + "+一根香肠";
+        return super.getMsg() + " +1根香肠";
     }
 
     @Override

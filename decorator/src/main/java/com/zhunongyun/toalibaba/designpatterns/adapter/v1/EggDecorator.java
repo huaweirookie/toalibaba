@@ -1,17 +1,16 @@
-package com.zhunongyun.toalibaba.designpatterns.adapter.battercake;
+package com.zhunongyun.toalibaba.designpatterns.adapter.v1;
 
-/**
- * 加鸡蛋装饰器
- */
-public class EggDecorator extends BatterCakeDecorator{
-
+public class EggDecorator extends BatterCakeDecorator {
     public EggDecorator(BatterCake batterCake) {
         super(batterCake);
     }
 
+    protected void doSomething() {
+    }
+
     @Override
     protected String getMsg() {
-        return super.getMsg() + "+一个鸡蛋";
+        return super.getMsg() + " +1个鸡蛋";
     }
 
     @Override

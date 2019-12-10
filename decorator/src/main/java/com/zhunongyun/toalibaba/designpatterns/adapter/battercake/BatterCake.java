@@ -1,18 +1,20 @@
 package com.zhunongyun.toalibaba.designpatterns.adapter.battercake;
 
 /**
- * 煎饼抽象类
+ * 煎饼类
  */
-public abstract class BatterCake {
+public class BatterCake {
     /**
      * 煎饼信息
-     * @return
      */
-    protected abstract String getMsg();
+    protected String getMsg() {
+        return "煎饼";
+    }
 
     /**
      * 煎饼价格
-     * @return
      */
-    protected abstract int getPrice();
+    public int getPrice() {
+        return 5;
+    }
 }

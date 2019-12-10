@@ -19,10 +19,12 @@ public abstract class JdbcTemplate {
             //1、获取连接
             Connection conn = this.getConnection();
             //2、创建语句集
-            PreparedStatement pstm = this.createPrepareStatement(conn, sql); //3、执行语句集
+            PreparedStatement pstm = this.createPrepareStatement(conn, sql);
+            //3、执行语句集
             ResultSet rs = this.executeQuery(pstm, values);
             //4、处理结果集
-            List<?> result = this.paresResultSet(rs, rowMapper); //5、关闭结果集
+            List<?> result = this.paresResultSet(rs, rowMapper);
+            //5、关闭结果集
             this.closeResultSet(rs);
             //6、关闭语句集
             this.closeStatement(pstm);
