@@ -13,7 +13,7 @@
     <artifactId>designpatterns</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>designpatterns</name>
-    <description>Demo project for Spring Boot</description>
+    <description>study java design pattern</description>
 
     <modules>
         <module>factory</module>
