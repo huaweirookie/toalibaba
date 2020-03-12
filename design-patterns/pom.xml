@@ -10,9 +10,9 @@
     </parent>
 
     <groupId>com.zhunongyun.toalibaba</groupId>
-    <artifactId>designpatterns</artifactId>
+    <artifactId>design-patterns</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>designpatterns</name>
+    <name>design-patterns</name>
     <description>study java design pattern</description>
 
     <modules>
@@ -26,7 +26,7 @@
         <module>decorator</module>
         <module>adapter</module>
         <module>observer</module>
-        <module>responsibilitychain</module>
+        <module>responsibility-chain</module>
     </modules>
 
     <properties>

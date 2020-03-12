@@ -9,9 +9,9 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.zhunongyun.toalibaba.designpatterns</groupId>
-    <artifactId>responsibilitychain</artifactId>
+    <artifactId>responsibility-chain</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>responsibilitychain</name>
+    <name>responsibility-chain</name>
     <description>Demo project for Spring Boot</description>
 
     <properties>
