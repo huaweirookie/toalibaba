@@ -1,4 +1,4 @@
-package com.zhunongyun.toalibaba.concurrent.programming;
+package com.zhunongyun.toalibaba.concurrent.programming.type;
 
 public class RunnableDemo implements Runnable{
 

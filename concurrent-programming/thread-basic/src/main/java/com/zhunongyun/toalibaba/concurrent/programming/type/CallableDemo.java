@@ -1,13 +1,10 @@
-package com.zhunongyun.toalibaba.concurrent.programming;
+package com.zhunongyun.toalibaba.concurrent.programming.type;
 
 import java.util.concurrent.*;
 
 public class CallableDemo implements Callable<String> {
     /**
-     * Computes a result, or throws an exception if unable to do so.
-     *
-     * @return computed result
-     * @throws Exception if unable to compute a result
+     * 处理业务流程
      */
     @Override
     public String call() throws Exception {
@@ -16,7 +13,7 @@ public class CallableDemo implements Callable<String> {
         int b = 2;
 
         System.out.println(a + b);
-        return "执行结果" + (a + b);
+        return "执行结果：" + (a + b);
     }
 
     public static void main(String[] args) throws ExecutionException, InterruptedException {

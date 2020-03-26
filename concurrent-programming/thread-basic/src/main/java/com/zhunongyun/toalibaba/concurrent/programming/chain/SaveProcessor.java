@@ -1,15 +1,15 @@
-package com.zhunongyun.toalibaba.concurrent.programming;
+package com.zhunongyun.toalibaba.concurrent.programming.chain;
 
 import java.util.concurrent.LinkedBlockingQueue;
 
 
-public class SaveProcessor extends Thread implements IRequestProcessor{
+public class SaveProcessor extends Thread implements IRequestProcessor {
     //阻塞队列
-    LinkedBlockingQueue<Request> requests=new LinkedBlockingQueue<>();
+    LinkedBlockingQueue<Request> requests = new LinkedBlockingQueue<>();
 
     private IRequestProcessor nextProcessor;
 
-    private volatile boolean isFinish=false;
+    private volatile boolean isFinish = false;
 
     public SaveProcessor() {
     }
@@ -17,17 +17,23 @@ public class SaveProcessor extends Thread implements IRequestProcessor{
     public SaveProcessor(IRequestProcessor nextProcessor) {
         this.nextProcessor = nextProcessor;
     }
-    public void shutdown(){ //对外提供关闭的方法
-        isFinish=true;
+
+    /**
+     * 对外提供关闭的方法
+     */
+    public void shutdown() {
+        isFinish = true;
     }
 
     @Override
     public void run() {
-        while(!isFinish){ //不建议这么写
+        //不建议这么写
+        while (!isFinish) {
             try {
-                Request request=requests.take();//阻塞式获取数据
+                //阻塞式获取数据
+                Request request = requests.take();
                 //真正的处理逻辑; store to mysql 。
-                System.out.println("SaveProcessor:"+request);
+                System.out.println("SaveProcessor:" + request);
                 //交给下一个责任链
                 nextProcessor.process(request);
             } catch (InterruptedException e) {
