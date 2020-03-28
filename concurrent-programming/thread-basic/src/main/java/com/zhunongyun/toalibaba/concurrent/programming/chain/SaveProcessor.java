@@ -2,7 +2,9 @@ package com.zhunongyun.toalibaba.concurrent.programming.chain;
 
 import java.util.concurrent.LinkedBlockingQueue;
 
-
+/**
+ * 保存处理
+ */
 public class SaveProcessor extends Thread implements IRequestProcessor {
     //阻塞队列
     LinkedBlockingQueue<Request> requests = new LinkedBlockingQueue<>();
@@ -35,7 +37,9 @@ public class SaveProcessor extends Thread implements IRequestProcessor {
                 //真正的处理逻辑; store to mysql 。
                 System.out.println("SaveProcessor:" + request);
                 //交给下一个责任链
-                nextProcessor.process(request);
+                if (nextProcessor != null) {
+                    nextProcessor.process(request);
+                }
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

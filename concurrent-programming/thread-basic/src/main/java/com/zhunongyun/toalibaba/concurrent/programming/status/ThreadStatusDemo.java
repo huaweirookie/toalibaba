@@ -1,4 +1,4 @@
-package com.zhunongyun.toalibaba.concurrent.programming;
+package com.zhunongyun.toalibaba.concurrent.programming.status;
 
 import java.util.concurrent.TimeUnit;
 
@@ -6,18 +6,18 @@ import java.util.concurrent.TimeUnit;
 public class ThreadStatusDemo {
 
     public static void main(String[] args) {
-        new Thread(()->{
-            while(true){
+        new Thread(() -> {
+            while (true) {
                 try {
                     TimeUnit.SECONDS.sleep(100);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
-        },"Time_Waiting_Thread").start();
+        }, "Time_Waiting_Thread").start();
 
-        new Thread(()->{
-            while(true){
+        new Thread(() -> {
+            while (true) {
                 synchronized (ThreadStatusDemo.class) {
                     try {
                         ThreadStatusDemo.class.wait();
@@ -26,18 +26,20 @@ public class ThreadStatusDemo {
                     }
                 }
             }
-        },"Wating_Thread").start();
+        }, "Waiting_Thread").start();
 
-    //BLOCKED
-        new Thread(new BlockedDemo(),"Blocke01_Thread").start();
-        new Thread(new BlockedDemo(),"Blocke02_Thread").start();
+        //BLOCKED
+        new Thread(new BlockedDemo(), "Blocked01_Thread").start();
+        new Thread(new BlockedDemo(), "Blocked02_Thread").start();
     }
-    static class BlockedDemo extends  Thread{
+
+
+    static class BlockedDemo extends Thread {
 
         @Override
         public void run() {
-            synchronized (BlockedDemo.class){
-                while(true){
+            synchronized (BlockedDemo.class) {
+                while (true) {
                     try {
                         TimeUnit.SECONDS.sleep(100);
                     } catch (InterruptedException e) {

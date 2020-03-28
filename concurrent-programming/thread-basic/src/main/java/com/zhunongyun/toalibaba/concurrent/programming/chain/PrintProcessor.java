@@ -2,7 +2,9 @@ package com.zhunongyun.toalibaba.concurrent.programming.chain;
 
 import java.util.concurrent.LinkedBlockingQueue;
 
-
+/**
+ * 打印处理
+ */
 public class PrintProcessor extends Thread implements IRequestProcessor {
     //阻塞队列
     LinkedBlockingQueue<Request> requests = new LinkedBlockingQueue<>();

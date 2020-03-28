@@ -2,7 +2,9 @@ package com.zhunongyun.toalibaba.concurrent.programming.chain;
 
 import java.util.concurrent.LinkedBlockingQueue;
 
-
+/**
+ * 预处理
+ */
 public class PrevProcessor extends Thread implements IRequestProcessor {
     //阻塞队列
     LinkedBlockingQueue<Request> requests = new LinkedBlockingQueue<>();
@@ -32,7 +34,9 @@ public class PrevProcessor extends Thread implements IRequestProcessor {
                 //真正的处理逻辑
                 System.out.println("prevProcessor:" + request);
                 //交给下一个责任链
-                nextProcessor.process(request);
+                if (nextProcessor != null) {
+                    nextProcessor.process(request);
+                }
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
