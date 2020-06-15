@@ -22,7 +22,8 @@ public class GeneratorRSAKey {
      */
     private Object[] initSecretkey() throws NoSuchAlgorithmException {
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-        keyPairGenerator.initialize(512);// 可以理解为：加密后的密文长度，实际原文要小些 越大 加密解密越慢
+        // 可以理解为：加密后的密文长度，实际原文要小些 越大 加密解密越慢
+        keyPairGenerator.initialize(512);
         KeyPair keyPair = keyPairGenerator.generateKeyPair();
 
         RSAPublicKey rsaPublicKey = (RSAPublicKey) keyPair.getPublic();
