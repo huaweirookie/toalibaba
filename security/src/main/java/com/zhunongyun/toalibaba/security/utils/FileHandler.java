@@ -93,7 +93,7 @@ public class FileHandler {
             boolean numberFlag = false;
 
             for (int i = 0; i < charList.length; i++) {
-                if ((charList[i] >= 65 && charList[i] <= 90) || (charList[i] >= 97 && charList[i] <= 122)) {
+                if ((charList[i] >= 65 && charList[i] <= 90) || (charList[i] >= 97 && charList[i] <= 122) || charList[i] == 41) {
                     englishFlag = true;
                 } else if (charList[i] >= 0x4e00 && charList[i] <= 0x9fbb) {
                     chineseFlag = true;
@@ -105,7 +105,7 @@ public class FileHandler {
                     numberFlag = false;
                 }
 
-                if ((englishFlag && chineseFlag) || (englishFlag && numberFlag) || (chineseFlag && numberFlag)) {
+                if ((englishFlag && chineseFlag) || (chineseFlag && numberFlag)) {
                     if (i > 0 && charList[i - 1] != 32) {
                         sb.append(" ");
                     }
@@ -124,7 +124,6 @@ public class FileHandler {
                         numberFlag = true;
                     }
                 }
-
                 sb.append(charList[i]);
             }
             return sb.toString();
