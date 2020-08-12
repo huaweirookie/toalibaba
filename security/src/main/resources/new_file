@@ -1,326 +1,292 @@
 [TOC]
 
 # 1. 定义
-备忘录模式(MementoPattern) 又称为快照模式(SnapshotPattern) 或令牌模式(TokenPattern),是指在不破坏封装的前提下,捕获一个对象的内部状态,并在对象之外保存这个状态.这样以后就可将该对象恢复到原先保存的状态,属于行为型模式
+解释器模式(InterpreterPattern) 是指给定一门语言,定义它的文法的一种表示,并定义一个解释器,该解释器使用该表示来解释语言中的句子.是一种按照规定的语法(文法 ) 进行解析的模式,属于行为型模式
 ```
-原文∶Without violating encapsulation， capture and externalize an object's internal state so that the object can be restored to this state later
+原文∶Given a language， define a representation for its grammar along with an interpreter that uses the representation to interpret sentences in the language
 ```
 
-在软件系统中,备忘录模式可以为我们提供一种"后悔药"的机制,它通过存储系统各个历史状态的快照,使得我们可以在任一时刻将系统回滚到某一个历史状态.
-
-备忘录模式本质是从发起人实体类(Originator) 隔离存储功能,降低实体类的职责.同时由于存储信息(Memento) 独立,且存储信息的实体交由管理类(Caretaker) 管理,则可以通过为管理类扩展额外的功能对存储信息进行扩展操作(比如增加历史快照功能…)
+就比如编译器可以将源码编译解释为机器码,让 CPU 能进行识别并运行.解释器模式的作用其实与编译器一样,都是将一些固定的文法(即语法 ) 进行解释,构建出一个解释句子的解释器.简单理解,解释器是一个简单语法分析工具,它可以识别句子语义,分离终结符号和非终结符号,提取出需要的信息,让我们能针对不同的信息做出相应的处理.其核心思想是识别文法,构建解释
 
 # 2. 应用场景
-对于我们程序员来说,可能天天都在使用备忘录模式,比如我们每天使用的 Git,SVN 都可以提供一种代码版本撤回的功能.还有一个比较贴切的现实场景应该是游戏的存档功能,通过将游戏当前进度存储到本地文件系统或数据库中,使得下次继续游戏时,玩家可以从之前的位置继续进行
-![](https://huaweirookie.oss-cn-shenzhen.aliyuncs.com/20200807150707.png)
+其实我们每天都生活在解释器模式中,我们平时所听到的音乐都可以通过简谱记录下来;还有战争年代发明的摩尔斯电码(又译为摩斯密码,Morsecode),其实也是一种解释器.![](https://huaweirookie.oss-cn-shenzhen.aliyuncs.com/20200811102617.png)
 
-备忘录模式适用于以下应用场景
-* 需要保存历史快照的场景
-* 希望在对象之外保存状态,且除了自己其他类对象无法访问状态保存具体内容.首先来看下备忘录模式的通用 UML 类图
-![](https://huaweirookie.oss-cn-shenzhen.aliyuncs.com/20200807154356.png)
+我们的程序中,如果存在一种特定类型的问题,该类型问题涉及多个不同实例,但是具备固定文法描述,那么可以使用解释器模式对该类型问题进行解释,分离出需要的信息,根据获取的信息做出相应的处理.简而言之,对于一些固定文法构建一个解释句子的解释器.解释器模式适用于以下应用场景
+* 一些重复出现的问题可以用一种简单的语言来进行表达
+* 一个简单语法需要解释的场景
 
-从 UML 类图中,我们可以看到,备忘录模式主要包含三种角色
-* 发起人角色(Originator)∶负责创建一个备忘录,记录自身需要保存的状态;具备状态回滚功能
-* 备忘录角色(Memento)∶用于存储 Originator 的内部状态,且可以防止 Originator 以外的对象进行访问
-* 备忘录管理员角色(Caretaker)∶负责存储,提供管理备忘录(Memento),无法对备忘录内容进行操作和访问
+首先来看下解释器模式的通用 UML 类图
+![](https://huaweirookie.oss-cn-shenzhen.aliyuncs.com/20200811103123.png)
 
-# 3. 利用压栈管理落地备忘录模式
-我们肯定都用过网页中的富文本编辑器,编辑器中的通常会附带草稿箱,撤销等这样的操作.下面我们用一段带代码来实现一个这样的功能.假设,我们在 GPer 社区中发布一篇文章,文章编辑的过程需要花很长时间,中间也会不停地撤销,修改.甚至可能要花好几天才能写出一篇精品文章,因此可能会将已经编辑好的内容实时保存到草稿箱
+从 UML 类图中,我们可以看到,解释器模式主要包含四种角色
+* 抽象表达式(Expression)∶负责定义一个解释方法 interpret,交由具体子类进行具体解释
+* 终结符表达式(TerminalExpression)∶实现文法中与终结符有关的解释操作.文法中的每一个终结符都有一个具体终结表达式与之相对应,比如公式 R=R1+R2,R1 和 R2 就是终结符,对应的解析 R1 和 R2 的解释器就是终结符表达式.通常一个解释器模式中只有一个终结符表达式,但有多个实例,对应不同的终结符(R1,R2)
+* 非终结符表达式(NonterminalExpression)∶实现文法中与非终结符有关的解释操作.文去中的每条规则都对应于一个非终结符表达式.非终结符表达式一般是文法中的运算符或者其他关键字,比如公式 R=R1+R2 中,"+"就是非终结符,解析"+"的解释器就是一个非终结符表达式.非终结符表达式根据逻辑的复杂程度而增加,原则上每个文法规则都对应一个非终结符表达式
+* 上下文环境类(Context)∶包含解释器之外的全局信息.它的任务一般是用来存放文法中各个终结符所对应的具体值,比如 R=R1+R2,给 R1 赋值 100,给 R2 赋值 200,这些信息需要存放到环境中
 
-首先创建发起人角色编辑器 Editor 类
+# 3. 使用解释器模式解析数学表达式
+下面我们用解释器模式来实现一个数学表达式计算器,包含加减乘除运算
+
+首先定义抽象表达式角色 IArithmeticlnterpreter 接口
 ```java
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class Editor {
-    private String title;
-    private String content;
-    private String imgs;
+public interface IArithmeticInterpreter {
+    int interpret();
+}
+```
 
-    public ArticleMemento saveToMemento(){
-        ArticleMemento articleMemento = new ArticleMemento(this.title,this.content,this.imgs);
-        return articleMemento;
-    }
+创建终结表达式角色 Interpreter 抽象类
+```java
+public abstract class Interpreter implements IArithmeticInterpreter {
 
-    public void undoFromMemento(ArticleMemento articleMemento){
-        this.title = articleMemento.getTitle();
-        this.content = articleMemento.getContent();
-        this.imgs = articleMemento.getImgs();
+    protected IArithmeticInterpreter left;
+    protected IArithmeticInterpreter right;
+
+    public Interpreter(IArithmeticInterpreter left, IArithmeticInterpreter right) {
+        this.left = left;
+        this.right = right;
     }
 }
 ```
 
-然后创建备忘录角色 ArticleMemento 类
+分别创建非终结表达式角色加,减,乘,除解释器,加法运算表达式 AddInterpreter 类
 ```java
-@Data
-@AllArgsConstructor
-public class ArticleMemento {
-    private String title;
-    private String content;
-    private String imgs;
-}
-```
+public class AddInterpreter extends Interpreter {
 
-最后创建备忘录管理角色草稿箱 DraftsBox 类
-```java
-public class DraftsBox {
-    private final Stack<ArticleMemento> STACK = new Stack<ArticleMemento>();
-
-    public ArticleMemento getMemento(){
-        ArticleMemento articleMemento = STACK.pop();
-        return articleMemento;
+    public AddInterpreter(IArithmeticInterpreter left, IArithmeticInterpreter right) {
+        super(left, right);
     }
 
-    public void addMemento(ArticleMemento articleMemento){
-        STACK.push(articleMemento);
+    public int interpret() {
+        return this.left.interpret() + this.right.interpret();
     }
 }
 ```
 
-草稿箱中定义的 Stack 类是 Vector 的一个子类,它实现了一个标准的后进先出的栈.主要定义了以下方法
-| 方法定义 | 方法描述 |
-| --- | --- |
-| booleanempty() | 测试堆栈是否为空 |
-| Objectpeek() | 查看堆栈顶部的对象,但不从堆栈中移除它 |
-| Objectpop() | 移除堆栈顶部的对象,并作为此函数的值返回该对象 |
-| Objectpush(Objectelement) | 把对象压入堆栈顶部 |
-| intsearch(Objectelement) | 返回对象在堆栈中的位置,以 1 为基数 |
+减法运算表达式 SubInterpreter 类
+```java
+public class SubInterpreter extends Interpreter {
+    public SubInterpreter(IArithmeticInterpreter left, IArithmeticInterpreter right) {
+        super(left, right);
+    }
 
-最后编写客户端测试代码
+    public int interpret() {
+        return this.left.interpret() - this.right.interpret();
+    }
+}
+```
+
+乘法运算表达式 Multilnterpreter 类
+```java
+public class MultiInterpreter extends Interpreter {
+
+    public MultiInterpreter(IArithmeticInterpreter left, IArithmeticInterpreter right){
+        super(left,right);
+    }
+
+    public int interpret() {
+        return this.left.interpret() * this.right.interpret();
+    }
+}
+```
+
+除法运算表达式 DivInterpreter 类数字表达式 Numlnterpreter 类
+```java
+public class DivInterpreter extends Interpreter {
+
+    public DivInterpreter(IArithmeticInterpreter left, IArithmeticInterpreter right){
+        super(left,right);
+    }
+
+    public int interpret() {
+        return this.left.interpret() / this.right.interpret();
+    }
+
+}
+```
+
+数字表达式 Numlnterpreter 类
+```java
+public class NumInterpreter implements IArithmeticInterpreter {
+    private int value;
+
+    public NumInterpreter(int value) {
+        this.value = value;
+    }
+
+    public int interpret() {
+        return this.value;
+    }
+}
+```
+
+创建计算器 GPCalculator 类
+```java
+public class GPCalculator {
+    private Stack<IArithmeticInterpreter> stack = new Stack<IArithmeticInterpreter>();
+
+    public GPCalculator(String expression) {
+        this.parse(expression);
+    }
+
+    private void parse(String expression) {
+        String [] elements = expression.split(" ");
+        IArithmeticInterpreter leftExpr, rightExpr;
+
+        for (int i = 0; i < elements.length ; i++) {
+            String operator = elements[i];
+            if (OperatorUtil.isOperator(operator)){
+                leftExpr = this.stack.pop();
+                rightExpr = new NumInterpreter(Integer.valueOf(elements[++i]));
+                System.out.println("出栈: " + leftExpr.interpret() + " 和 " + rightExpr.interpret());
+                this.stack.push(OperatorUtil.getInterpreter(leftExpr, rightExpr,operator));
+                System.out.println("应用运算符: " + operator);
+            }
+            else{
+                NumInterpreter numInterpreter = new NumInterpreter(Integer.valueOf(elements[i]));
+                this.stack.push(numInterpreter);
+                System.out.println("入栈: " + numInterpreter.interpret());
+            }
+        }
+    }
+
+    public int calculate() {
+        return this.stack.pop().interpret();
+    }
+}
+```
+
+工具类 OperatorUtil 具体代码
+```java
+public class OperatorUtil {
+
+    public static boolean isOperator(String symbol) {
+        return (symbol.equals("+") || symbol.equals("-") || symbol.equals("*"));
+    }
+
+    public static Interpreter getInterpreter(IArithmeticInterpreter left, IArithmeticInterpreter right, String symbol) {
+        if (symbol.equals("+")) {
+            return new AddInterpreter(left, right);
+        } else if (symbol.equals("-")) {
+            return new SubInterpreter(left, right);
+        } else if (symbol.equals("*")) {
+            return new MultiInterpreter(left, right);
+        } else if (symbol.equals("/")) {
+            return new DivInterpreter(left, right);
+        }
+        return null;
+    }
+}
+```
+
+编写客户端代码
 ```java
 public class Test {
+
     public static void main(String[] args) {
-        DraftsBox draftsBox = new DraftsBox();
-
-        Editor editor = new Editor("我是这样手写 Spring 的，麻雀虽小五脏俱全",
-                "本文节选自《Spring5 核心原理与 30 个类手写实战》一书，Tom 著，电子工业出版社出版。",
-                "35576a9ef6fc407aa088eb8280fb1d9d.png");
-
-        ArticleMemento articleMemento = editor.saveToMemento();
-        draftsBox.addMemento(articleMemento);
-
-        System.out.println("标题：" + editor.getTitle() + "\n" +
-                            "内容：" + editor.getContent() + "\n" +
-                            "插图：" + editor.getImgs() + "\n 暂存成功");
-
-        System.out.println("完整的信息" + editor);
-
-        System.out.println("==========首次修改文章===========");
-        editor.setTitle("【Tom 原创】我是这样手写 Spring 的，麻雀虽小五脏俱全");
-        editor.setContent("本文节选自《Spring5 核心原理与 30 个类手写实战》一书，Tom 著");
-
-        System.out.println("==========首次修改文章完成===========");
-
-        System.out.println("完整的信息" + editor);
-
-        articleMemento = editor.saveToMemento();
-
-        draftsBox.addMemento(articleMemento);
-
-        System.out.println("==========保存到草稿箱===========");
-
-
-        System.out.println("==========第 2 次修改文章===========");
-        editor.setTitle("手写 Spring");
-        editor.setContent("本文节选自《Spring5 核心原理与 30 个类手写实战》一书，Tom 著");
-        System.out.println("完整的信息" + editor);
-        System.out.println("==========第 2 次修改文章完成===========");
-
-        System.out.println("==========第 1 次撤销===========");
-        articleMemento = draftsBox.getMemento();
-        editor.undoFromMemento(articleMemento);
-        System.out.println("完整的信息" + editor);
-        System.out.println("==========第 1 次撤销完成===========");
-
-        System.out.println("==========第 2 次撤销===========");
-        articleMemento = draftsBox.getMemento();
-        editor.undoFromMemento(articleMemento);
-        System.out.println("完整的信息" + editor);
-        System.out.println("==========第 2 次撤销完成===========");
+        System.out.println("result: " + new GPCalculator("10 + 30").calculate());
+        System.out.println("result: " + new GPCalculator("10 + 30 - 20").calculate());
+        System.out.println("result: " + new GPCalculator("100 * 2 + 400 * 1 + 66").calculate());
     }
 }
 ```
 
 运行结果
 ```
-标题：我是这样手写 Spring 的，麻雀虽小五脏俱全
-内容：本文节选自《Spring5 核心原理与 30 个类手写实战》一书，Tom 著，电子工业出版社出版。
-插图：35576a9ef6fc407aa088eb8280fb1d9d.png
-暂存成功
-完整的信息 Editor(title=我是这样手写 Spring 的，麻雀虽小五脏俱全, content=本文节选自《Spring5 核心原理与 30 个类手写实战》一书，Tom 著，电子工业出版社出版。, imgs=35576a9ef6fc407aa088eb8280fb1d9d.png)
-==========首次修改文章===========
-==========首次修改文章完成===========
-完整的信息 Editor(title=【Tom 原创】我是这样手写 Spring 的，麻雀虽小五脏俱全, content=本文节选自《Spring5 核心原理与 30 个类手写实战》一书，Tom 著, imgs=35576a9ef6fc407aa088eb8280fb1d9d.png)
-==========保存到草稿箱===========
-==========第2次修改文章===========
-完整的信息 Editor(title=手写 Spring, content=本文节选自《Spring5 核心原理与 30 个类手写实战》一书，Tom 著, imgs=35576a9ef6fc407aa088eb8280fb1d9d.png)
-==========第2次修改文章完成===========
-==========第1次撤销===========
-完整的信息 Editor(title=【Tom 原创】我是这样手写 Spring 的，麻雀虽小五脏俱全, content=本文节选自《Spring5 核心原理与 30 个类手写实战》一书，Tom 著, imgs=35576a9ef6fc407aa088eb8280fb1d9d.png)
-==========第1次撤销完成===========
-==========第2次撤销===========
-完整的信息 Editor(title=我是这样手写 Spring 的，麻雀虽小五脏俱全, content=本文节选自《Spring5 核心原理与 30 个类手写实战》一书，Tom 著，电子工业出版社出版。, imgs=35576a9ef6fc407aa088eb8280fb1d9d.png)
-==========第2次撤销完成===========
+入栈: 10
+出栈: 10 和 30
+应用运算符: +
+result: 40
+入栈: 10
+出栈: 10 和 30
+应用运算符: +
+出栈: 40 和 20
+应用运算符: -
+result: 20
+入栈: 100
+出栈: 100 和 2
+应用运算符: *
+出栈: 200 和 400
+应用运算符: +
+出栈: 600 和 1
+应用运算符: *
+出栈: 600 和 66
+应用运算符: +
+result: 666
 ```
 
-# 4. 备忘录模式在源码中的体现
-备忘录模式在框架源码中的应用也是比较少的,主要还是结合具体的应用场景来使用.我在 JDK 源码一顿找,目前为止还是没找到具体的应用,包括在 MyBatis 中也没有找到对应的源码.如果有小伙伴找到可以联系我.在 Spring 的 webflow 源码中还是找到一个 StateManageableMessageContext 接口,我们来看它的源代码
+
+# 4. 在源码中的体现
+JDK 源码中的 Pattern 对正则表达式的编译和解析
 ```java
-public interface StateManageableMessageContext extends MessageContext {
-    Serializable createMessagesMemento();
+public final class Pattern implements java.io.Serializable {
+    ...
+    private Pattern(String p, int f) {
+        pattern = p;
+        flags = f;
 
-    void restoreMessages(Serializable var1);
+        // to use UNICODE_CASE if UNICODE_CHARACTER_CLASS present
+        if ((flags & UNICODE_CHARACTER_CLASS) != 0)
+            flags |= UNICODE_CASE;
 
-    void setMessageSource(MessageSource var1);
+        // Reset group index count
+        capturingGroupCount = 1;
+        localCount = 0;
+
+        if (pattern.length() > 0) {
+            try {
+                compile();
+            } catch (StackOverflowError soe) {
+                throw error("Stack overflow during pattern compilation");
+            }
+        } else {
+            root = new Start(lastAccept);
+            matchRoot = lastAccept;
+        }
+    }
+
+    public static Pattern compile(String regex) {
+        return new Pattern(regex, 0);
+    }
+
+    public static Pattern compile(String regex, int flags) {
+        return new Pattern(regex, flags);
+    }
+    ...
 }
 ```
 
-我们看到有一个 createMessagesMemento() 方法,创建一个消息备忘录.可以打开它的实现类
+再来看 Spring 中的 ExpressionParser 接口
 ```java
-public class DefaultMessageContext implements StateManageableMessageContext {
-    private static final Log logger = LogFactory.getLog(DefaultMessageContext.class);
-    private MessageSource messageSource;
-    private Map<Object, List<Message>> sourceMessages;
+public interface ExpressionParser {
+    Expression parseExpression(String var1) throws ParseException;
 
-    public DefaultMessageContext() {
-        this.sourceMessages = new NamelessClass_1(new LinkedHashMap());
-        this.init((MessageSource)null);
-    }
-
-    public DefaultMessageContext(MessageSource messageSource) {
-        class NamelessClass_1 extends AbstractCachingMapDecorator<Object, List<Message>> {
-            NamelessClass_1(Map x0) {
-                super(x0);
-            }
-
-            protected List<Message> create(Object source) {
-                return new ArrayList();
-            }
-        }
-
-        this.sourceMessages = new NamelessClass_1(new LinkedHashMap());
-        this.init(messageSource);
-    }
-
-    public MessageSource getMessageSource() {
-        return this.messageSource;
-    }
-
-    public Message[] getAllMessages() {
-        List<Message> messages = new ArrayList();
-        Iterator i$ = this.sourceMessages.values().iterator();
-
-        while(i$.hasNext()) {
-            List<Message> list = (List)i$.next();
-            messages.addAll(list);
-        }
-
-        return (Message[])messages.toArray(new Message[messages.size()]);
-    }
-
-    public Message[] getMessagesBySource(Object source) {
-        List<Message> messages = (List)this.sourceMessages.get(source);
-        return (Message[])messages.toArray(new Message[messages.size()]);
-    }
-
-    public Message[] getMessagesByCriteria(MessageCriteria criteria) {
-        List<Message> messages = new ArrayList();
-        Iterator i$ = this.sourceMessages.values().iterator();
-
-        while(i$.hasNext()) {
-            List<Message> sourceMessages = (List)i$.next();
-            Iterator i$ = sourceMessages.iterator();
-
-            while(i$.hasNext()) {
-                Message message = (Message)i$.next();
-                if (criteria.test(message)) {
-                    messages.add(message);
-                }
-            }
-        }
-
-        return (Message[])messages.toArray(new Message[messages.size()]);
-    }
-
-    public boolean hasErrorMessages() {
-        Iterator i$ = this.sourceMessages.values().iterator();
-
-        while(i$.hasNext()) {
-            List<Message> sourceMessages = (List)i$.next();
-            Iterator i$ = sourceMessages.iterator();
-
-            while(i$.hasNext()) {
-                Message message = (Message)i$.next();
-                if (message.getSeverity() == Severity.ERROR) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
-    public void addMessage(MessageResolver messageResolver) {
-        Locale currentLocale = LocaleContextHolder.getLocale();
-        if (logger.isDebugEnabled()) {
-            logger.debug("Resolving message using " + messageResolver);
-        }
-
-        Message message = messageResolver.resolveMessage(this.messageSource, currentLocale);
-        List<Message> messages = (List)this.sourceMessages.get(message.getSource());
-        if (logger.isDebugEnabled()) {
-            logger.debug("Adding resolved message " + message);
-        }
-
-        messages.add(message);
-    }
-
-    public void clearMessages() {
-        this.sourceMessages.clear();
-    }
-
-    public Serializable createMessagesMemento() {
-        return new LinkedHashMap(this.sourceMessages);
-    }
-
-    public void restoreMessages(Serializable messagesMemento) {
-        this.sourceMessages.putAll((Map)messagesMemento);
-    }
-
-    public void setMessageSource(MessageSource messageSource) {
-        if (messageSource == null) {
-            messageSource = new DefaultMessageContext.DefaultTextFallbackMessageSource((NamelessClass_1)null);
-        }
-
-        this.messageSource = (MessageSource)messageSource;
-    }
-
-    private void init(MessageSource messageSource) {
-        this.setMessageSource(messageSource);
-        this.sourceMessages.get((Object)null);
-    }
-
-    public String toString() {
-        return (new ToStringCreator(this)).append("sourceMessages", this.sourceMessages).toString();
-    }
-
-    private static class DefaultTextFallbackMessageSource extends AbstractMessageSource {
-        private DefaultTextFallbackMessageSource() {
-        }
-
-        protected MessageFormat resolveCode(String code, Locale locale) {
-            return null;
-        }
-    }
+    Expression parseExpression(String var1, ParserContext var2) throws ParseException;
 }
 ```
 
-我们看到其主要逻辑就相当于是给 Message 留一个备份,以备恢复之用.
+这里的源码我们不深入讲解,通过前面我们自己编写的案例大致能够清楚其原理.我们不妨来编写一段客户端代码验证一下功能.我们编写如下测试代码
+```java
+public static void main(String[] args) {
+    ExpressionParser parser = new ExpressionParser();
+    Expression expression = parser.parseExpression("100 * 2 + 400 * 1 + 66");
+    int result - (Integer)expression.getValue();
+    System.out.println("计算结果是:" + result);
+}
+```
+
+其运行结果
+```
+计算结果是:666
+```
+
+和我们所期望的是一致的
 
 # 5. 优缺点
-## 5.1 优点
-* 简化发起人实体类(Originator) 职责,隔离状态存储与获取,实现了信息的封装,客户端无需关心状态的保存细节
-* 提供状态回滚功能
+# 5.1 优点
+* 扩展性强∶在解释器模式中由于语法是由很多类表示的,当语法规则更改时,只需修改相应的非终结符表达式即可;若扩展语法时,只需添加相应非终结符类即可
+* 增加了新的解释表达式的方式
+* 易于实现文法∶解释器模式对应的文法应当是比较简单且易于实现的,过于复杂的语法并不适合使用解释器模式
 
 # 5.2 缺点
-* 消耗资源∶如果需要保存的状态过多时,每一次保存都会消耗很多内存
+* 语法规则较复杂时,会引起类膨胀∶解释器模式每个语法都要产生一个非终结符表达式,当语法规则比较复杂时,就会产生大量的解释类,增加系统维护困难
+* 执行效率比较低∶解释器模式采用递归调用方法,每个非终结符表达式只关心与自己有关的表达式,每个表达式需要知道最终的结果,因此完整表达式的最终结果是通过从后往前递归调用的方式获取得到.当完整表达式层级较深时,解释效率下降,且出错时调试困难,因为递归迭代层级太深
