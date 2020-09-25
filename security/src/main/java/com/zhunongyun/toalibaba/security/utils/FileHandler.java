@@ -5,31 +5,32 @@ import java.util.regex.Pattern;
 
 /**
  * markdown字符替换
+ * @author huaweirookie
  */
 public class FileHandler {
 
     private final static String FILE_PATH = "./../security/src/main/resources/";
 
-    private final static Pattern pattern = Pattern.compile("[a-zA-z]");
+    private final static Pattern ENGLISH_HANDLER_PATTERN = Pattern.compile("[a-zA-z]");
 
     public void file() throws IOException {
 
-        StringBuffer stringBuffer = new StringBuffer();
+        StringBuilder stringBuilder = new StringBuilder();
 
         try (FileReader reader = new FileReader(new File(FILE_PATH + "old_file"));
              BufferedReader br = new BufferedReader(reader)) {
 
             String line;
-            boolean no_handler = false;
+            boolean noHandler = false;
             while ((line = br.readLine()) != null) {
                 // 处理替换字符
-                if (!no_handler && line.indexOf("```") > -1) {
-                    no_handler = true;
-                } else if (no_handler && line.indexOf("```") > -1) {
-                    no_handler = false;
+                if (!noHandler && line.contains("```")) {
+                    noHandler = true;
+                } else if (noHandler && line.contains("```")) {
+                    noHandler = false;
                 }
 
-                if (!no_handler) {
+                if (!noHandler) {
                     line = line.replaceAll("：", ":")
                             .replaceAll("（", "(")
                             .replaceAll("）", ")")
@@ -40,29 +41,29 @@ public class FileHandler {
                         if (line.matches("^#+ {1}[0-9]+\\.{1}.* {1}.*$")) {
                             line = line.substring(0, line.indexOf(" ", line.lastIndexOf(".")) + 1) + line.substring(line.indexOf(" ", line.lastIndexOf(".")) + 1).replaceAll(" ", "");
                         }
-                    } else if (line.indexOf(" | ") > -1) {
+                    } else if (line.contains(" | ")) {
                         String[] temp = line.split("\\|");
 
-                        StringBuffer sb = new StringBuffer("|");
+                        StringBuilder sb = new StringBuilder("|");
                         for (int i = 1; i < temp.length; i++) {
-                            sb.append(" " + temp[i].replaceAll(" | ", "") + " |");
+                            sb.append(" ").append(temp[i].replace(" | ", "")).append(" |");
                         }
                         line = sb.toString();
                     } else if (line.matches("^\\*{1} {1}.*$")) {
-                        line = line.substring(0, 2) + line.substring(2).replaceAll(" | ", "");
+                        line = line.substring(0, 2) + line.substring(2).replace(" | ", "");
                     } else {
-                        line = line.replaceAll(" | ", "");
+                        line = line.replace(" | ", "");
                     }
 
-                    line = line.replaceAll(">\\*", ">\\* ");
+                    line = line.replace(">\\*", ">\\* ");
                 }
 
                 // 将英文单词两边加上空格
-                if (pattern.matcher(line).find()) {
+                if (ENGLISH_HANDLER_PATTERN.matcher(line).find()) {
                     line = this.handlerEnglish(line);
                 }
 
-                stringBuffer.append(line).append("\r\n");
+                stringBuilder.append(line).append("\r\n");
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -75,7 +76,7 @@ public class FileHandler {
         try (FileWriter writer = new FileWriter(outFile);
              BufferedWriter out = new BufferedWriter(writer)) {
 
-            out.write(stringBuffer.toString());
+            out.write(stringBuilder.toString());
             out.flush();
         } catch (Exception e) {
             e.printStackTrace();
@@ -85,7 +86,7 @@ public class FileHandler {
     private String handlerEnglish(String line) {
         char[] charList = line.toCharArray();
 
-        if (null != charList && charList.length > 0) {
+        if (charList.length > 0) {
             StringBuilder sb = new StringBuilder();
 
             boolean englishFlag = false;
@@ -106,7 +107,7 @@ public class FileHandler {
                 }
 
                 if ((englishFlag && chineseFlag) || (chineseFlag && numberFlag)) {
-                    if (i > 0 && charList[i - 1] != 32) {
+                    if (charList[i - 1] != 32) {
                         sb.append(" ");
                     }
 

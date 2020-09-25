@@ -1,292 +1,64 @@
 [TOC]
 
 # 1. 定义
-解释器模式（Interpreter Pattern）是指给定一门语言，定义它的文法的一种表示，并定义一个解释器，该解释器使用该表示来解释语言中的句子。是一种按照规定的语法（文法）进行解析的模式，属于行为型模式
-```
-原文∶Given a language， define a representation for its grammar along with an interpreter that uses the representation to interpret sentences in the language
-```
+当某个类加载器需要加载某个.class文件时，它首先把这个任务委托给他的上级类加载器，递归这个操作，如果上级的类加载器没有加载，自己才会去加载这个类
 
-就比如编译器可以将源码编译解释为机器码，让CPU能进行识别并运行。解释器模式的作用其实与编译器一样，都是将一些固定的文法（即语法）进行解释，构建出一个解释句子的解释器。简单理解，解释器是一个简单语法分析工具，它可以识别句子语义，分离终结符号和非终结符号，提取出需要的信息，让我们能针对不同的信息做出相应的处理。其核心思想是识别文法，构建解释
+# 2. 类加载器的类别
+* BootstrapClassLoader(启动类加载器)
+* ExtClassLoader(标准扩展类加载器)
+* AppClassLoader(系统类加载器)
+* CustomClassLoader（用户自定义类加载器）
 
-# 2. 应用场景
-其实我们每天都生活在解释器模式中，我们平时所听到的音乐都可以通过简谱记录下来;还有战争年代发明的摩尔斯电码（又译为摩斯密码，Morse code），其实也是一种解释器。![](https://huaweirookie.oss-cn-shenzhen.aliyuncs.com/20200811102617.png)
+## 2.1 BootstrapClassLoader(启动类加载器)
+c++编写，加载java核心库 java.\*,构造ExtClassLoader和AppClassLoader。由于引导类加载器涉及到虚拟机本地实现细节，开发者无法直接获取到启动类加载器的引用，所以不允许直接通过引用进行操作
 
-我们的程序中，如果存在一种特定类型的问题，该类型问题涉及多个不同实例，但是具备固定文法描述，那么可以使用解释器模式对该类型问题进行解释，分离出需要的信息，根据获取的信息做出相应的处理。简而言之，对于一些固定文法构建一个解释句子的解释器。解释器模式适用于以下应用场景
-* 一些重复出现的问题可以用一种简单的语言来进行表达
-* 一个简单语法需要解释的场景
+## 2.2 ExtClassLoader(标准扩展类加载器)
+java编写，加载扩展库，如classpath中的jre ，javax.\*或者java.ext.dir 指定位置中的类，开发者可以直接使用标准扩展类加载器
 
-首先来看下解释器模式的通用 UML 类图
-![](https://huaweirookie.oss-cn-shenzhen.aliyuncs.com/20200811103123.png)
+## 2.3 AppClassLoader(系统类加载器)
+java编写，加载程序所在的目录，如user.dir所在的位置的class
 
-从 UML类图中，我们可以看到，解释器模式 主要包含四种角色
-* 抽象表达式（Expression）∶负责定义一个解释方法 interpret，交由具体子类进行具体解释
-* 终结符表达式（TerminalExpression）∶实现文法中与终结符有关的解释操作。文法中的每一个终结符都有一个具体终结表达式与之相对应，比如公式 R=R1+R2，R1和 R2就是终结符，对应的解析R1和 R2的解释器就是终结符表达式。通常一个解释器模式中只有一个终结符表达式，但有多个实例，对应不同的终结符（R1，R2）
-* 非终结符表达式（NonterminalExpression）∶实现文法中与非终结符有关的解释操作。文去中的每条规则都对应于一个非终结符表达式。非终结符表达式一般是文法中的运算符或者其他关键字，比如公式 R=R1+R2中，"+"就是非终结符，解析"+"的解释器就是一个非终结符表达式。非终结符表达式根据逻辑的复杂程度而增加，原则上每个文法规则都对应一个非终结符表达式
-* 上下文环境类（Context）∶包含解释器之外的全局信息。它的任务一般是用来存放文法中各个终结符所对应的具体值，比如R=R1+R2，给R1赋值100，给R2赋值200，这些信息需要存放到环境中
+## 2.4 CustomClassLoader（用户自定义类加载器）
+java编写,用户自定义的类加载器,可加载指定路径的class文件
 
-# 3. 使用解释器模式解析数学表达式
-下面我们用解释器模式来实现一个数学表达式计算器，包含加减乘除运算
-
-首先定义抽象表达式角色 IArithmeticlnterpreter 接口
+# 3. 源码分析
 ```java
-public interface IArithmeticInterpreter {
-    int interpret();
-}
-```
-
-创建终结表达式角色 Interpreter抽象类
-```java
-public abstract class Interpreter implements IArithmeticInterpreter {
-
-    protected IArithmeticInterpreter left;
-    protected IArithmeticInterpreter right;
-
-    public Interpreter(IArithmeticInterpreter left, IArithmeticInterpreter right) {
-        this.left = left;
-        this.right = right;
-    }
-}
-```
-
-分别创建非终结表达式角色加、减、乘、除解释器，加法运算表达式 AddInterpreter类
-```java
-public class AddInterpreter extends Interpreter {
-
-    public AddInterpreter(IArithmeticInterpreter left, IArithmeticInterpreter right) {
-        super(left, right);
-    }
-
-    public int interpret() {
-        return this.left.interpret() + this.right.interpret();
-    }
-}
-```
-
-减法运算表达式 SubInterpreter类
-```java
-public class SubInterpreter extends Interpreter {
-    public SubInterpreter(IArithmeticInterpreter left, IArithmeticInterpreter right) {
-        super(left, right);
-    }
-
-    public int interpret() {
-        return this.left.interpret() - this.right.interpret();
-    }
-}
-```
-
-乘法运算表达式 Multilnterpreter类
-```java
-public class MultiInterpreter extends Interpreter {
-
-    public MultiInterpreter(IArithmeticInterpreter left, IArithmeticInterpreter right){
-        super(left,right);
-    }
-
-    public int interpret() {
-        return this.left.interpret() * this.right.interpret();
-    }
-}
-```
-
-除法运算表达式 DivInterpreter类数字表达式 Numlnterpreter类
-```java
-public class DivInterpreter extends Interpreter {
-
-    public DivInterpreter(IArithmeticInterpreter left, IArithmeticInterpreter right){
-        super(left,right);
-    }
-
-    public int interpret() {
-        return this.left.interpret() / this.right.interpret();
-    }
-
-}
-```
-
-数字表达式 Numlnterpreter类
-```java
-public class NumInterpreter implements IArithmeticInterpreter {
-    private int value;
-
-    public NumInterpreter(int value) {
-        this.value = value;
-    }
-
-    public int interpret() {
-        return this.value;
-    }
-}
-```
-
-创建计算器 GPCalculator 类
-```java
-public class GPCalculator {
-    private Stack<IArithmeticInterpreter> stack = new Stack<IArithmeticInterpreter>();
-
-    public GPCalculator(String expression) {
-        this.parse(expression);
-    }
-
-    private void parse(String expression) {
-        String [] elements = expression.split(" ");
-        IArithmeticInterpreter leftExpr, rightExpr;
-
-        for (int i = 0; i < elements.length ; i++) {
-            String operator = elements[i];
-            if (OperatorUtil.isOperator(operator)){
-                leftExpr = this.stack.pop();
-                rightExpr = new NumInterpreter(Integer.valueOf(elements[++i]));
-                System.out.println("出栈: " + leftExpr.interpret() + " 和 " + rightExpr.interpret());
-                this.stack.push(OperatorUtil.getInterpreter(leftExpr, rightExpr,operator));
-                System.out.println("应用运算符: " + operator);
-            }
-            else{
-                NumInterpreter numInterpreter = new NumInterpreter(Integer.valueOf(elements[i]));
-                this.stack.push(numInterpreter);
-                System.out.println("入栈: " + numInterpreter.interpret());
-            }
-        }
-    }
-
-    public int calculate() {
-        return this.stack.pop().interpret();
-    }
-}
-```
-
-工具类 OperatorUtil 具体代码
-```java
-public class OperatorUtil {
-
-    public static boolean isOperator(String symbol) {
-        return (symbol.equals("+") || symbol.equals("-") || symbol.equals("*"));
-    }
-
-    public static Interpreter getInterpreter(IArithmeticInterpreter left, IArithmeticInterpreter right, String symbol) {
-        if (symbol.equals("+")) {
-            return new AddInterpreter(left, right);
-        } else if (symbol.equals("-")) {
-            return new SubInterpreter(left, right);
-        } else if (symbol.equals("*")) {
-            return new MultiInterpreter(left, right);
-        } else if (symbol.equals("/")) {
-            return new DivInterpreter(left, right);
-        }
-        return null;
-    }
-}
-```
-
-编写客户端代码
-```java
-public class Test {
-
-    public static void main(String[] args) {
-        System.out.println("result: " + new GPCalculator("10 + 30").calculate());
-        System.out.println("result: " + new GPCalculator("10 + 30 - 20").calculate());
-        System.out.println("result: " + new GPCalculator("100 * 2 + 400 * 1 + 66").calculate());
-    }
-}
-```
-
-运行结果
-```
-入栈: 10
-出栈: 10 和 30
-应用运算符: +
-result: 40
-入栈: 10
-出栈: 10 和 30
-应用运算符: +
-出栈: 40 和 20
-应用运算符: -
-result: 20
-入栈: 100
-出栈: 100 和 2
-应用运算符: *
-出栈: 200 和 400
-应用运算符: +
-出栈: 600 和 1
-应用运算符: *
-出栈: 600 和 66
-应用运算符: +
-result: 666
-```
-
-
-# 4. 在源码中的体现
-JDK 源码中的 Pattern 对正则表达式的编译和解析
-```java
-public final class Pattern implements java.io.Serializable {
-    ...
-    private Pattern(String p, int f) {
-        pattern = p;
-        flags = f;
-
-        // to use UNICODE_CASE if UNICODE_CHARACTER_CLASS present
-        if ((flags & UNICODE_CHARACTER_CLASS) != 0)
-            flags |= UNICODE_CASE;
-
-        // Reset group index count
-        capturingGroupCount = 1;
-        localCount = 0;
-
-        if (pattern.length() > 0) {
+protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+    synchronized (getClassLoadingLock(name)) {
+        // 首先检查这个classsh是否已经加载过了
+        Class<?> c = findLoadedClass(name);
+        if (c == null) {
+            long t0 = System.nanoTime();
             try {
-                compile();
-            } catch (StackOverflowError soe) {
-                throw error("Stack overflow during pattern compilation");
+                // c==null表示没有加载，如果有父类的加载器则让父类加载器加载
+                if (parent != null) {
+                    c = parent.loadClass(name, false);
+                } else {
+                    //如果父类的加载器为空 则说明递归到bootStrapClassloader了
+                    //bootStrapClassloader比较特殊无法通过get获取
+                    c = findBootstrapClassOrNull(name);
+                }
+            } catch (ClassNotFoundException e) {}
+            if (c == null) {
+                //如果bootstrapClassLoader 仍然没有加载过，则递归回来，尝试自己去加载class
+                long t1 = System.nanoTime();
+                c = findClass(name);
+                sun.misc.PerfCounter.getParentDelegationTime().addTime(t1 - t0);
+                sun.misc.PerfCounter.getFindClassTime().addElapsedTimeFrom(t1);
+                sun.misc.PerfCounter.getFindClasses().increment();
             }
-        } else {
-            root = new Start(lastAccept);
-            matchRoot = lastAccept;
         }
+        if (resolve) {
+            resolveClass(c);
+        }
+        return c;
     }
-
-    public static Pattern compile(String regex) {
-        return new Pattern(regex, 0);
-    }
-
-    public static Pattern compile(String regex, int flags) {
-        return new Pattern(regex, flags);
-    }
-    ...
 }
 ```
 
-再来看 Spring中的 ExpressionParser 接口
-```java
-public interface ExpressionParser {
-    Expression parseExpression(String var1) throws ParseException;
+# 4. 委派机制的流程图
+![](https://huaweirookie.oss-cn-shenzhen.aliyuncs.com/20200922210337.png)
 
-    Expression parseExpression(String var1, ParserContext var2) throws ParseException;
-}
-```
-
-这里的源码我们不深入讲解，通过前面我们自己编写的案例大致能够清楚其原理。我们不妨来编写一段客户端代码验证一下功能。我们编写如下测试代码
-```java
-public static void main(String[] args) {
-    ExpressionParser parser = new ExpressionParser();
-    Expression expression = parser.parseExpression("100 * 2 + 400 * 1 + 66");
-    int result - (Integer)expression.getValue();
-    System.out.println("计算结果是:" + result);
-}
-```
-
-其运行结果
-```
-计算结果是:666
-```
-
-和我们所期望的是一致的
-
-# 5. 优缺点
-# 5.1 优点
-* 扩展性强∶在解释器模式中由于语法是由很多类表示的，当语法规则更改时，只需修改相应的非终结符表达式即可;若扩展语法时，只需添加相应非终结符类即可
-* 增加了新的解释表达式的方式
-* 易于实现文法∶解释器模式对应的文法应当是比较简单且易于实现的，过于复杂的语法并不适合使用解释器模式
-
-# 5.2 缺点
-* 语法规则较复杂时，会引起类膨胀∶解释器模式每个语法都要产生一个非终结符表达式，当语法规则比较复杂时，就会产生大量的解释类，增加系统维护困难
-* 执行效率比较低∶解释器模式采用递归调用方法，每个非终结符表达式只关心与自己有关的表达式，每个表达式需要知道最终的结果，因此完整表达式的最终结果是通过从后往前递归调用的方式获取得到。当完整表达式层级较深时，解释效率下降，且出错时调试困难，因为递归迭代层级太深
+# 5. 双亲委派机制的作用
+* 防止重复加载同一个.class。通过委托去向上面问一问，加载过了，就不用再加载一遍。保证数据安全。
+* 保证核心.class不能被篡改。通过委托方式，不会去篡改核心.clas，即使篡改也不会去加载，即使加载也不会是同一个.class对象了。不同的加载器加载同一个.class也不是同一个Class对象。这样保证了Class执行安全
