@@ -9,12 +9,12 @@ import java.lang.annotation.Target;
 
 /**
  * 自动注入
- * @author Tom
  *
+ * @author Tom
  */
 @Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface GPAutowired {
-	String value() default "";
+    String value() default "";
 }

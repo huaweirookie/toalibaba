@@ -6,6 +6,7 @@ package com.gupaoedu.vip.spring.framework.beans;
 public class GPBeanWrapper {
     private Object wrapperInstance;
     private Class<?> wrappedClass;
+
     public GPBeanWrapper(Object instance) {
         this.wrapperInstance = instance;
         this.wrappedClass = instance.getClass();

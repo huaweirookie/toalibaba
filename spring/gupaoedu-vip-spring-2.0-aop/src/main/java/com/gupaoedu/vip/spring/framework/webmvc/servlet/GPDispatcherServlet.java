@@ -26,13 +26,13 @@ public class GPDispatcherServlet extends HttpServlet {
 
     private List<GPHandlerMapping> handlerMappings = new ArrayList<GPHandlerMapping>();
 
-    private Map<GPHandlerMapping,GPHandlerAdapter> handlerAdapters = new HashMap<GPHandlerMapping, GPHandlerAdapter>();
+    private Map<GPHandlerMapping, GPHandlerAdapter> handlerAdapters = new HashMap<GPHandlerMapping, GPHandlerAdapter>();
 
     private List<GPViewResolver> viewResolvers = new ArrayList<GPViewResolver>();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        this.doPost(req,resp);
+        this.doPost(req, resp);
     }
 
     @Override
@@ -40,10 +40,10 @@ public class GPDispatcherServlet extends HttpServlet {
 
         //6、委派,根据URL去找到一个对应的Method并通过response返回
         try {
-            doDispatch(req,resp);
+            doDispatch(req, resp);
         } catch (Exception e) {
             try {
-                processDispatchResult(req,resp,new GPModelAndView("500"));
+                processDispatchResult(req, resp, new GPModelAndView("500"));
             } catch (Exception e1) {
                 e1.printStackTrace();
                 resp.getWriter().write("500 Exception,Detail : " + Arrays.toString(e.getStackTrace()));
@@ -58,48 +58,58 @@ public class GPDispatcherServlet extends HttpServlet {
 
         //1、通过URL获得一个HandlerMapping
         GPHandlerMapping handler = getHandler(req);
-        if(handler == null){
-            processDispatchResult(req,resp,new GPModelAndView("404"));
+        if (handler == null) {
+            processDispatchResult(req, resp, new GPModelAndView("404"));
             return;
         }
-        
+
         //2、根据一个HandlerMaping获得一个HandlerAdapter
         GPHandlerAdapter ha = getHandlerAdapter(handler);
 
         //3、解析某一个方法的形参和返回值之后，统一封装为ModelAndView对象
-        GPModelAndView mv = ha.handler(req,resp,handler);
+        GPModelAndView mv = ha.handler(req, resp, handler);
 
         // 就把ModelAndView变成一个ViewResolver
-        processDispatchResult(req,resp,mv);
+        processDispatchResult(req, resp, mv);
 
     }
 
     private GPHandlerAdapter getHandlerAdapter(GPHandlerMapping handler) {
-        if(this.handlerAdapters.isEmpty()){return null;}
+        if (this.handlerAdapters.isEmpty()) {
+            return null;
+        }
         return this.handlerAdapters.get(handler);
     }
 
     private void processDispatchResult(HttpServletRequest req, HttpServletResponse resp, GPModelAndView mv) throws Exception {
-        if(null == mv){return;}
-        if(this.viewResolvers.isEmpty()){return;}
+        if (null == mv) {
+            return;
+        }
+        if (this.viewResolvers.isEmpty()) {
+            return;
+        }
 
         for (GPViewResolver viewResolver : this.viewResolvers) {
             GPView view = viewResolver.resolveViewName(mv.getViewName());
             //直接往浏览器输出
-            view.render(mv.getModel(),req,resp);
+            view.render(mv.getModel(), req, resp);
             return;
         }
     }
 
     private GPHandlerMapping getHandler(HttpServletRequest req) {
-        if(this.handlerMappings.isEmpty()){return  null;}
+        if (this.handlerMappings.isEmpty()) {
+            return null;
+        }
         String url = req.getRequestURI();
         String contextPath = req.getContextPath();
-        url = url.replaceAll(contextPath,"").replaceAll("/+","/");
+        url = url.replaceAll(contextPath, "").replaceAll("/+", "/");
 
         for (GPHandlerMapping mapping : handlerMappings) {
             Matcher matcher = mapping.getPattern().matcher(url);
-            if(!matcher.matches()){continue;}
+            if (!matcher.matches()) {
+                continue;
+            }
             return mapping;
         }
         return null;
@@ -153,37 +163,43 @@ public class GPDispatcherServlet extends HttpServlet {
 
     private void initHandlerAdapters(GPApplicationContext context) {
         for (GPHandlerMapping handlerMapping : handlerMappings) {
-            this.handlerAdapters.put(handlerMapping,new GPHandlerAdapter());
+            this.handlerAdapters.put(handlerMapping, new GPHandlerAdapter());
         }
     }
 
     private void initHandlerMappings(GPApplicationContext context) {
-        if(this.applicationContext.getBeanDefinitionCount() == 0){ return;}
+        if (this.applicationContext.getBeanDefinitionCount() == 0) {
+            return;
+        }
 
         for (String beanName : this.applicationContext.getBeanDefinitionNames()) {
             Object instance = applicationContext.getBean(beanName);
             Class<?> clazz = instance.getClass();
 
-            if(!clazz.isAnnotationPresent(GPController.class)){ continue; }
+            if (!clazz.isAnnotationPresent(GPController.class)) {
+                continue;
+            }
 
             //相当于提取 class上配置的url
             String baseUrl = "";
-            if(clazz.isAnnotationPresent(GPRequestMapping.class)){
+            if (clazz.isAnnotationPresent(GPRequestMapping.class)) {
                 GPRequestMapping requestMapping = clazz.getAnnotation(GPRequestMapping.class);
                 baseUrl = requestMapping.value();
             }
 
             //只获取public的方法
             for (Method method : clazz.getMethods()) {
-                if(!method.isAnnotationPresent(GPRequestMapping.class)){continue;}
+                if (!method.isAnnotationPresent(GPRequestMapping.class)) {
+                    continue;
+                }
                 //提取每个方法上面配置的url
                 GPRequestMapping requestMapping = method.getAnnotation(GPRequestMapping.class);
 
                 // //demo//query
-                String regex = ("/" + baseUrl + "/" + requestMapping.value().replaceAll("\\*",".*")).replaceAll("/+","/");
+                String regex = ("/" + baseUrl + "/" + requestMapping.value().replaceAll("\\*", ".*")).replaceAll("/+", "/");
                 Pattern pattern = Pattern.compile(regex);
                 //handlerMapping.put(url,method);
-                handlerMappings.add(new GPHandlerMapping(pattern,instance,method));
+                handlerMappings.add(new GPHandlerMapping(pattern, instance, method));
                 System.out.println("Mapped : " + regex + "," + method);
             }
 

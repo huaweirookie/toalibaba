@@ -8,16 +8,16 @@ import java.lang.annotation.Target;
 
 /**
  * 请求参数映射
- * @author Tom
  *
+ * @author Tom
  */
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface GPRequestParam {
-	
-	String value() default "";
-	
-	boolean required() default true;
+
+    String value() default "";
+
+    boolean required() default true;
 
 }

@@ -8,12 +8,12 @@ import java.lang.annotation.Target;
 
 /**
  * 页面交互
- * @author Tom
  *
+ * @author Tom
  */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface GPController {
-	String value() default "";
+    String value() default "";
 }

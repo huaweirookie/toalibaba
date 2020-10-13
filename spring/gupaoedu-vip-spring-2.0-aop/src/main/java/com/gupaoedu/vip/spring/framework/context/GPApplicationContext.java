@@ -24,10 +24,10 @@ public class GPApplicationContext {
 
     private GPBeanDefinitionReader reader;
 
-    private Map<String,GPBeanDefinition> beanDefinitionMap = new HashMap<String, GPBeanDefinition>();
+    private Map<String, GPBeanDefinition> beanDefinitionMap = new HashMap<String, GPBeanDefinition>();
 
-    private Map<String,GPBeanWrapper> factoryBeanInstanceCache = new HashMap<String, GPBeanWrapper>();
-    private Map<String,Object> factoryBeanObjectCache = new HashMap<String, Object>();
+    private Map<String, GPBeanWrapper> factoryBeanInstanceCache = new HashMap<String, GPBeanWrapper>();
+    private Map<String, Object> factoryBeanObjectCache = new HashMap<String, Object>();
 
     public GPApplicationContext(String... configLocations) {
 
@@ -42,7 +42,7 @@ public class GPApplicationContext {
             doRegistBeanDefinition(beanDefinitions);
 
             doAutowrited();
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -50,7 +50,7 @@ public class GPApplicationContext {
     private void doAutowrited() {
         //调用getBean()
         //这一步，所有的Bean并没有真正的实例化，还只是配置阶段
-        for (Map.Entry<String,GPBeanDefinition> beanDefinitionEntry : this.beanDefinitionMap.entrySet()) {
+        for (Map.Entry<String, GPBeanDefinition> beanDefinitionEntry : this.beanDefinitionMap.entrySet()) {
             String beanName = beanDefinitionEntry.getKey();
             getBean(beanName);
         }
@@ -58,26 +58,26 @@ public class GPApplicationContext {
 
     private void doRegistBeanDefinition(List<GPBeanDefinition> beanDefinitions) throws Exception {
         for (GPBeanDefinition beanDefinition : beanDefinitions) {
-            if(this.beanDefinitionMap.containsKey(beanDefinition.getFactoryBeanName())){
+            if (this.beanDefinitionMap.containsKey(beanDefinition.getFactoryBeanName())) {
                 throw new Exception("The " + beanDefinition.getFactoryBeanName() + "is exists");
             }
-            beanDefinitionMap.put(beanDefinition.getFactoryBeanName(),beanDefinition);
-            beanDefinitionMap.put(beanDefinition.getBeanClassName(),beanDefinition);
+            beanDefinitionMap.put(beanDefinition.getFactoryBeanName(), beanDefinition);
+            beanDefinitionMap.put(beanDefinition.getBeanClassName(), beanDefinition);
         }
     }
 
     //Bean的实例化，DI是从而这个方法开始的
-    public Object getBean(String beanName){
+    public Object getBean(String beanName) {
         //1、先拿到BeanDefinition配置信息
         GPBeanDefinition beanDefinition = this.beanDefinitionMap.get(beanName);
         //2、反射实例化newInstance();
-        Object instance = instantiateBean(beanName,beanDefinition);
+        Object instance = this.instantiateBean(beanName, beanDefinition);
         //3、封装成一个叫做BeanWrapper
         GPBeanWrapper beanWrapper = new GPBeanWrapper(instance);
         //4、保存到IoC容器
-        factoryBeanInstanceCache.put(beanName,beanWrapper);
+        factoryBeanInstanceCache.put(beanName, beanWrapper);
         //5、执行依赖注入
-        populateBean(beanName,beanDefinition,beanWrapper);
+        populateBean(beanName, beanDefinition, beanWrapper);
 
         return beanWrapper.getWrapperInstance();
     }
@@ -95,19 +95,21 @@ public class GPApplicationContext {
         Class<?> clazz = beanWrapper.getWrappedClass();
 
         //在Spring中@Component
-        if(!(clazz.isAnnotationPresent(GPController.class) || clazz.isAnnotationPresent(GPService.class))){
+        if (!(clazz.isAnnotationPresent(GPController.class) || clazz.isAnnotationPresent(GPService.class))) {
             return;
         }
 
         //把所有的包括private/protected/default/public 修饰字段都取出来
         for (Field field : clazz.getDeclaredFields()) {
-            if(!field.isAnnotationPresent(GPAutowired.class)){ continue; }
+            if (!field.isAnnotationPresent(GPAutowired.class)) {
+                continue;
+            }
 
             GPAutowired autowired = field.getAnnotation(GPAutowired.class);
 
             //如果用户没有自定义的beanName，就默认根据类型注入
             String autowiredBeanName = autowired.value().trim();
-            if("".equals(autowiredBeanName)){
+            if ("".equals(autowiredBeanName)) {
                 //field.getType().getName() 获取字段的类型
                 autowiredBeanName = field.getType().getName();
             }
@@ -116,11 +118,11 @@ public class GPApplicationContext {
             field.setAccessible(true);
 
             try {
-                if(this.factoryBeanInstanceCache.get(autowiredBeanName) == null){
+                if (this.factoryBeanInstanceCache.get(autowiredBeanName) == null) {
                     continue;
                 }
                 //ioc.get(beanName) 相当于通过接口的全名拿到接口的实现的实例
-                field.set(instance,this.factoryBeanInstanceCache.get(autowiredBeanName).getWrapperInstance());
+                field.set(instance, this.factoryBeanInstanceCache.get(autowiredBeanName).getWrapperInstance());
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
                 continue;
@@ -135,9 +137,9 @@ public class GPApplicationContext {
         String className = beanDefinition.getBeanClassName();
         Object instance = null;
         try {
-            if(this.factoryBeanObjectCache.containsKey(beanName)){
+            if (this.factoryBeanObjectCache.containsKey(beanName)) {
                 instance = this.factoryBeanObjectCache.get(beanName);
-            }else {
+            } else {
                 Class<?> clazz = Class.forName(className);
                 //2、默认的类名首字母小写
                 instance = clazz.newInstance();
@@ -145,20 +147,20 @@ public class GPApplicationContext {
                 //==================AOP开始=========================
                 //如果满足条件，就直接返回Proxy对象
                 //1、加载AOP的配置文件
-                GPAdvisedSupport config = instantionAopConfig(beanDefinition);
+                GPAdvisedSupport config = this.instantionAopConfig(beanDefinition);
                 config.setTargetClass(clazz);
                 config.setTarget(instance);
 
                 //判断规则，要不要生成代理类，如果要就覆盖原生对象
                 //如果不要就不做任何处理，返回原生对象
-                if(config.pointCutMath()){
+                if (config.pointCutMath()) {
                     instance = new GPJdkDynamicAopProxy(config).getProxy();
                 }
 
                 //===================AOP结束========================
                 this.factoryBeanObjectCache.put(beanName, instance);
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return instance;
@@ -175,7 +177,7 @@ public class GPApplicationContext {
         return new GPAdvisedSupport(config);
     }
 
-    public Object getBean(Class beanClass){
+    public Object getBean(Class beanClass) {
         return getBean(beanClass.getName());
     }
 
