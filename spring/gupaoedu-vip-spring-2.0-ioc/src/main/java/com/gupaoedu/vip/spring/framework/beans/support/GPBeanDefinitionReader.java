@@ -15,34 +15,35 @@ import java.util.Properties;
  */
 public class GPBeanDefinitionReader {
 
-    /**
-     * 保存扫描的结果
-     */
-    private List<String> registryBeanClasses = new ArrayList<String>();
+    //保存扫描的结果
+    private List<String> regitryBeanClasses = new ArrayList<String>();
 
     private Properties contextConfig = new Properties();
 
     public GPBeanDefinitionReader(String... configLocations) {
-        this.doLoadConfig(configLocations[0]);
+        doLoadConfig(configLocations[0]);
 
         //扫描配置文件中的配置的相关的类
-        this.doScanner(contextConfig.getProperty("scanPackage"));
+        doScanner(contextConfig.getProperty("scanPackage"));
     }
 
     public List<GPBeanDefinition> loadBeanDefinitions() {
-        List<GPBeanDefinition> result = new ArrayList<>();
+        List<GPBeanDefinition> result = new ArrayList<GPBeanDefinition>();
         try {
-            for (String className : registryBeanClasses) {
+            for (String className : regitryBeanClasses) {
                 Class<?> beanClass = Class.forName(className);
+                if (beanClass.isInterface()) {
+                    continue;
+                }
 
                 //保存类对应的ClassName（全类名）
                 //还有beanName
                 //1、默认是类名首字母小写
-                result.add(this.doCreateBeanDefinition(toLowerFirstCase(beanClass.getSimpleName()), beanClass.getName()));
+                result.add(doCreateBeanDefinition(toLowerFirstCase(beanClass.getSimpleName()), beanClass.getName()));
                 //2、自定义
                 //3、接口注入
                 for (Class<?> i : beanClass.getInterfaces()) {
-                    result.add(this.doCreateBeanDefinition(i.getName(), beanClass.getName()));
+                    result.add(doCreateBeanDefinition(i.getName(), beanClass.getName()));
                 }
 
             }
@@ -62,8 +63,7 @@ public class GPBeanDefinitionReader {
 
 
     private void doLoadConfig(String contextConfigLocation) {
-        try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(
-                contextConfigLocation.replaceAll("classpath:", ""))) {
+        try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(contextConfigLocation.replaceAll("classpath:", ""))) {
             contextConfig.load(is);
         } catch (IOException e) {
             e.printStackTrace();
@@ -72,8 +72,7 @@ public class GPBeanDefinitionReader {
 
     private void doScanner(String scanPackage) {
         //jar 、 war 、zip 、rar
-        URL url = this.getClass().getClassLoader().getResource(
-                "/" + scanPackage.replaceAll("\\.", "/"));
+        URL url = this.getClass().getClassLoader().getResource("/" + scanPackage.replaceAll("\\.", "/"));
         File classPath = new File(url.getFile());
 
         //当成是一个ClassPath文件夹
@@ -87,7 +86,7 @@ public class GPBeanDefinitionReader {
                 //全类名 = 包名.类名
                 String className = (scanPackage + "." + file.getName().replace(".class", ""));
                 //Class.forName(className);
-                registryBeanClasses.add(className);
+                regitryBeanClasses.add(className);
             }
         }
     }
@@ -99,4 +98,5 @@ public class GPBeanDefinitionReader {
         chars[0] += 32;
         return String.valueOf(chars);
     }
+
 }

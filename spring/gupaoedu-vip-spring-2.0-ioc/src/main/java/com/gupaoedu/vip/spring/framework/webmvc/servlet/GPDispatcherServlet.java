@@ -1,7 +1,9 @@
 package com.gupaoedu.vip.spring.framework.webmvc.servlet;
 
 
-import com.gupaoedu.vip.spring.framework.annotation.*;
+import com.gupaoedu.vip.spring.framework.annotation.GPController;
+import com.gupaoedu.vip.spring.framework.annotation.GPRequestMapping;
+import com.gupaoedu.vip.spring.framework.annotation.GPRequestParam;
 import com.gupaoedu.vip.spring.framework.context.GPApplicationContext;
 
 import javax.servlet.ServletConfig;
@@ -11,9 +13,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 委派模式
@@ -39,7 +42,7 @@ public class GPDispatcherServlet extends HttpServlet {
 
         //6、委派,根据URL去找到一个对应的Method并通过response返回
         try {
-            this.doDispatch(req, resp);
+            doDispatch(req, resp);
         } catch (Exception e) {
             e.printStackTrace();
             resp.getWriter().write("500 Exception,Detail : " + Arrays.toString(e.getStackTrace()));
@@ -60,6 +63,7 @@ public class GPDispatcherServlet extends HttpServlet {
         Map<String, String[]> params = req.getParameterMap();
 
         Method method = this.handlerMapping.get(url);
+
 
         //获取形参列表
         Class<?>[] parameterTypes = method.getParameterTypes();
@@ -87,7 +91,6 @@ public class GPDispatcherServlet extends HttpServlet {
                         }
                     }
                 }
-
             }
         }
 
@@ -106,7 +109,7 @@ public class GPDispatcherServlet extends HttpServlet {
 
         //==============MVC部分==============
         //5、初始化HandlerMapping
-        this.doInitHandlerMapping();
+        doInitHandlerMapping();
 
         System.out.println("GP Spring framework is init.");
     }
@@ -122,6 +125,7 @@ public class GPDispatcherServlet extends HttpServlet {
             if (!clazz.isAnnotationPresent(GPController.class)) {
                 continue;
             }
+
 
             //相当于提取 class上配置的url
             String baseUrl = "";
@@ -154,6 +158,4 @@ public class GPDispatcherServlet extends HttpServlet {
         chars[0] += 32;
         return String.valueOf(chars);
     }
-
-
 }

@@ -116,15 +116,13 @@ public class GPApplicationContext {
                     continue;
                 }
                 //ioc.get(beanName) 相当于通过接口的全名拿到接口的实现的实例
-                field.set(instance,this.factoryBeanInstanceCache.get(autowiredBeanName).getWrapperInstance());
+                field.set(instance, this.factoryBeanInstanceCache.get(autowiredBeanName).getWrapperInstance());
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
                 continue;
             }
         }
-
     }
-
 
     //创建真正的实例对象
     private Object instantiateBean(String beanName, GPBeanDefinition beanDefinition) {
