@@ -15,7 +15,6 @@
  */
 
 package org.springframework.web.servlet;
-
 import java.io.IOException;
 import java.security.Principal;
 import java.util.ArrayList;
@@ -64,6 +63,7 @@ import org.springframework.web.context.support.XmlWebApplicationContext;
 import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.util.NestedServletException;
 import org.springframework.web.util.WebUtils;
+
 
 /**
  * Base servlet for Spring's web framework. Provides integration with
@@ -515,7 +515,38 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 					elapsedTime + " ms");
 		}
 	}
+	/**
+	 * Overridden method of {@link HttpServletBean}, invoked after any bean properties
+	 * have been set. Creates this servlet's WebApplicationContext.
+	 */
+	@Override
+	protected final void initServletBean() throws ServletException {
+		getServletContext().log("Initializing Spring FrameworkServlet '" + getServletName() + "'");
+		if (this.logger.isInfoEnabled()) {
+			this.logger.info("FrameworkServlet '" + getServletName() + "': initialization started");
+		}
+		long startTime = System.currentTimeMillis();
 
+		try {
+
+			this.webApplicationContext = initWebApplicationContext();
+			initFrameworkServlet();
+		}
+		catch (ServletException ex) {
+			this.logger.error("Context initialization failed", ex);
+			throw ex;
+		}
+		catch (RuntimeException ex) {
+			this.logger.error("Context initialization failed", ex);
+			throw ex;
+		}
+
+		if (this.logger.isInfoEnabled()) {
+			long elapsedTime = System.currentTimeMillis() - startTime;
+			this.logger.info("FrameworkServlet '" + getServletName() + "': initialization completed in " +
+					elapsedTime + " ms");
+		}
+	}
 	/**
 	 * Initialize and publish the WebApplicationContext for this servlet.
 	 * <p>Delegates to {@link #createWebApplicationContext} for actual creation
